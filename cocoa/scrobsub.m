@@ -29,7 +29,7 @@ extern void(*scrobsub_callback)(int event, const char* message);
 
 bool scrobsub_retrieve_credentials()
 {
-#if __DEBUGGING__
+#ifdef __AS_DEBUGGING__
     scrobsub_username = "testuser";
     scrobsub_session_key = "d20e0c83aa4252d8bcb945fbaa4aec2a";
     return true;
@@ -65,7 +65,8 @@ void scrobsub_get(char response[256], const char* url)
     NSString *output = [NSString stringWithContentsOfURL:[NSURL URLWithString:[NSString stringWithUTF8String:url]]
                                             usedEncoding:&encoding
                                                    error:nil];
-    strncpy(response, [output UTF8String], 256);
+    if(output)
+        strncpy(response, [output UTF8String], 256);
 }
 
 void scrobsub_post(char response[256], const char* url, const char* post_data)
@@ -120,6 +121,8 @@ bool scrobsub_finish_auth()
     NSString* sk = [[[session elementsForName:@"key"] lastObject] stringValue];
     NSString* username = [[[session elementsForName:@"name"] lastObject] stringValue];
     [xml release];
+       
+    if(!username || !sk)return false;
 
     scrobsub_session_key = strdup([sk UTF8String]);
     scrobsub_username = strdup([username UTF8String]);
