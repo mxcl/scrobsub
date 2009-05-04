@@ -29,17 +29,17 @@ static time_t start_time = 0;
 static time_t pause_time = 0;
 static int state = SCROBSUB_STOPPED;
 static char* session_id = 0;
-static unsigned int N = 0;
+static unsigned int N = 0; // cached length of artist+track+album+mbid
 static char* np_url = 0;
 static char* submit_url = 0;
 static char rating = ' ';
 
-static char* artist;
-static char* track;
-static char* album;
-static char* mbid;
-static unsigned int duration;
-static unsigned int track_number;
+static char* artist = 0;
+static char* track = 0;
+static char* album = 0;
+static char* mbid = 0;
+static unsigned int duration = 0;
+static unsigned int track_number = 0;
 
 void(*scrobsub_callback)(int event, const char* message);
 void scrobsub_get(char* response, const char* url);
@@ -51,7 +51,7 @@ bool scrobsub_launch_audioscrobbler();
 // compiler will optimise this stuff away now
 #define relay false
 #define scrobsub_relay(x)
-#define scrobsub_relay_start(x, y, z);
+#define scrobsub_relay_start(x, y, z)
 #else
 static bool relay = true;
 void scrobsub_relay(int);
@@ -80,6 +80,11 @@ void scrobsub_init(void(*callback)(int, const char*))
 #endif    
     if(!relay && !scrobsub_retrieve_credentials())
         (callback)(SCROBSUB_AUTH_REQUIRED, 0);
+    
+    artist = malloc(0); // these must always point at malloc'd data
+    track = malloc(0);
+    album = malloc(0);
+    mbid = malloc(0);
 }    
 
 static void get_handshake_auth(char out[33], time_t time)
@@ -187,6 +192,19 @@ static void submit()
     }
 }
 
+
+void scrobsub_change_metadata(const char* _artist, const char* _track, const char* _album)
+{
+    free(artist);
+    free(track);
+    free(album);
+    artist = strdup(_artist);
+    track = strdup(_track);
+    album = strdup(_album);    
+    N = strlen(artist)+strlen(track)+strlen(album)+strlen(mbid);
+}
+
+
 void scrobsub_start(const char* _artist, const char* _track, unsigned int _duration, const char* _album, unsigned int _track_number, const char* _mbid)
 {
     if(_duration>9999) _duration = 9999;
@@ -205,22 +223,19 @@ void scrobsub_start(const char* _artist, const char* _track, unsigned int _durat
     
     state = SCROBSUB_PLAYING;
     
-    artist = strdup(_artist);
-    track = strdup(_track);
-    album = strdup(_album);
+    free(mbid);
     mbid = strdup(_mbid);
     duration = _duration;
     track_number = _track_number;
     rating = ' ';
-
-    start_time = now();
-    
-    N = strlen(_artist)+strlen(_track)+strlen(_album)+strlen(_mbid);
+    scrobsub_change_metadata(_artist, _track, _album);
+    start_time = now();    
     
     //TODO, don't emit np if user is skipping fast, then you need a timer
     //    static time_t previous_np = 0;
     //    time_t time = now();
     //    if(time - previous_np < 4)
+    //NOTE I pushed this into our GUIs, maybe that is all that matters
     
     //TODO don't submit track number if 0
 
@@ -279,9 +294,9 @@ void scrobsub_stop()
     else if(state != SCROBSUB_STOPPED){
         submit();
         state = SCROBSUB_STOPPED;
-        free( artist ); free( track ); free( album ); free( mbid );
-        artist = track = album = mbid = 0;
         duration = track_number = 0;
+        // indeed don't free or set artist, track etc. to NULL, they must always
+        // point to somthing malloc'd. We free in scrobsub_start()
     }
 }
 

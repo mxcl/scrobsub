@@ -67,11 +67,15 @@ void scrobsub_resume();
   * scrobsub_start() instead */
 void scrobsub_stop();
 
+    
 /** marks the current track as loved, it is worth noting, you also have to call
   * the Last.fm track.love webservice separately (scrobsub doesn't do it for 
   * you). This stupid system will be like this forever prolly. Sorry about that.
   */
 void scrobsub_love();
+
+/** support this if you can and it is appropriate */
+void scrobsub_change_metadata(const char* artist, const char* track, const char* album);
 
 
 #define SCROBSUB_STOPPED 0
@@ -87,7 +91,8 @@ extern char* scrobsub_session_key;
 extern char* scrobsub_username;
 
 
-/** for your convenience, we need it, so maybe you can use it too */
+/** for your convenience, we need it, so maybe you can use it too, we use the
+  * platform native library to generate this md5 */
 void scrobsub_md5(char out[33], const char* in);
 
 
