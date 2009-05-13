@@ -247,7 +247,9 @@ void scrobsub_start(const char* _artist, const char* _track, unsigned int _durat
         state = SCROBSUB_PLAYING;
         return;
     }
-    
+ 
+    if (!scrobsub_session_key)
+        return; //TODO
     if (!session_id)
         handshake();
     if (state != SCROBSUB_STOPPED)
