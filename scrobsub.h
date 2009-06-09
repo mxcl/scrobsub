@@ -99,6 +99,11 @@ extern char* scrobsub_username;
 void scrobsub_md5(char out[33], const char* in);
 
 
+#define SCROBSUB_VERSION 0x00020000
+#define SCROBSUB_MAJOR_VERSION 2
+#define SCROBSUB_MINOR_VERSION 0
+#define SCROBSUB_PATCH_VERSION 0
+
 #if __cplusplus
 }
 #endif

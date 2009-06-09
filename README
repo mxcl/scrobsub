@@ -1,5 +1,5 @@
-ScrobSub 2
-==========
+ScrobSub
+========
 A cross-platform plain-c library that allows you to submit scrobbles to Last.fm
 using the official Audioscrobbler application, or if that isn't installed,
 independently.
