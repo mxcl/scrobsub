@@ -4,6 +4,9 @@ A cross-platform plain-c library that allows you to submit scrobbles to Last.fm
 using the official Audioscrobbler application, or if that isn't installed,
 independently.
 
+The license is BSD, so use it in commercial or open source software as you see
+fit.
+
 Max Howell <max@last.fm>
 
 

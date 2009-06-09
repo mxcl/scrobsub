@@ -1,31 +1,18 @@
-/***************************************************************************
- *   Copyright 2005-2009 Last.fm Ltd.                                      *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   51 Franklin Steet, Fifth Floor, Boston, MA  02110-1301, USA.          *
- ***************************************************************************/
+/*
+   This software is in the public domain, furnished "as is", without
+   technical support, and with no warranty, express or implied, as to its
+   usefulness for any purpose.
 
+   gcc -w -std=c99 -g3 -ggdb -o scrobsub-example -I. EXAMPLE.c -lcrypto -lxml2 -lcurl
+*/
 #define SCROBSUB_NO_RELAY 1
 #define SCROBSUB_CLIENT_ID "ass"
 
-#include "_configure.h"
 #include "scrobsub.c"
-#include "portable/auth-libxml2.c"
-#include "portable/http-curl.c"
-#include "portable/md5.c"
-#include "portable/persistence-simple.c"
+#include "auth-libxml2.c"
+#include "http-curl.c"
+#include "md5.c"
+#include "persistence-simple.c"
 #include <unistd.h>
 
 
