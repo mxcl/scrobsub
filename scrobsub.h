@@ -25,7 +25,20 @@
 #ifndef __SCROBSUB_H__
 #define __SCROBSUB_H__
 
-#include <stdbool.h>
+#if _MSC_VER <= 1400
+ #define SCROBSUB_NO_C99 1
+#endif
+
+#if SCROBSUB_NO_C99
+ #if !__cplusplus
+  #define bool int
+  #define false 0
+  #define true 1
+ #endif
+#else
+ #include <stdbool.h>
+#endif
+
 
 #if __cplusplus
 extern "C" {

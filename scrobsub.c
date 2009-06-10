@@ -29,6 +29,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef _WIN32
+#include <malloc.h>
+#define snprintf _snprintf
+#endif
 
 static time_t start_time = 0;
 static time_t pause_time = 0;
@@ -86,10 +90,10 @@ void scrobsub_init(void(*callback)(int, const char*))
     if(!relay && !scrobsub_retrieve_credentials())
         (callback)(SCROBSUB_AUTH_REQUIRED, 0);
     
-    artist = malloc(0); // these must always point at malloc'd data
-    track = malloc(0);
-    album = malloc(0);
-    mbid = malloc(0);
+    artist = (char*)malloc(0); // these must always point at malloc'd data
+    track = (char*)malloc(0);
+    album = (char*)malloc(0);
+    mbid = (char*)malloc(0);
 }    
 
 static void get_handshake_auth(char out[33], time_t time)
@@ -121,7 +125,13 @@ static char* escape(const char* in)
     #define toHexHelper(c) hexnumbers[(c) & 0xf]
     
     int const n = strlen(in);
+#if SCROBSUB_NO_C99
+    // we only use alloca on Windows as its use is discouraged on BSD
+    char* outs = (char*)alloca(n);
+#else
     char outs[n*3];
+#endif
+    
     char* out = outs;
     for(int i = 0; i < n; ++i){
         char c = *in++;
@@ -156,7 +166,11 @@ static void handshake()
     char auth[33];
     get_handshake_auth(auth, time);
     int n = 34+8+8+6+11+3+strlen(username)+13+32+9+32+4+32+1;
+#if SCROBSUB_NO_C99
+    char* url = (char*)alloca(n); //alloca discouraged on BSD
+#else
     char url[n];
+#endif
     
     n = snprintf(url, n, "http://post.audioscrobbler.com:80/"
                  "?hs=true"
@@ -205,7 +219,11 @@ static void submit()
         return;
     
     int n = 32+N+4+2+10+1+1 +2+9*6;
+#if SCROBSUB_NO_C99
+    char* post_data = (char*)alloca(n); //alloca discouraged on BSD
+#else
     char post_data[n];
+#endif
     
     n = snprintf(post_data, n,
                      "s=%s"
@@ -278,7 +296,12 @@ void scrobsub_start(const char* _artist, const char* _track, unsigned int _durat
     
     //TODO don't submit track number if 0
 
-    char post_data[32+4+2+N+2+6*3];
+    #define POST_DATA_LENGTH 32+4+2+N+2+6*3
+#if SCROBSUB_NO_C99
+    char* post_data = (char*)alloca(POST_DATA_LENGTH); //alloca discouraged on BSD
+#else
+    char post_data[POST_DATA_LENGTH];
+#endif    
     snprintf(post_data, sizeof(post_data),
                            "s=%s"
                           "&a=%s"
