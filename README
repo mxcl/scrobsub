@@ -39,7 +39,7 @@ cl /TP scrobsub.c scrobsub-winsock.c md5.c relay.c
 
 Note that scrobsub.c is C99, and Visual Studio still isn't compliant, so you
 need to compile with the /TP switch; this compiles the files as though they
-are c++. You can still link to the c runtime though.
+are C++. You can still link to the C-runtime though.
 
 All platforms
 -------------
