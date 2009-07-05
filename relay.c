@@ -29,13 +29,20 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
+#if __APPLE__
+bool scrobsub_fsref(FSRef* fsref)
+{
+    OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("fm.last.Audioscrobbler"), NULL, fsref, NULL);
+    return err != kLSApplicationNotFoundErr;
+}
+#endif
+
 /** returns false if Audioscrobbler is not installed */
 bool scrobsub_launch_audioscrobbler()
 {
 #if __APPLE__
     FSRef fsref;
-    OSStatus err = LSFindApplicationForInfo(kLSUnknownCreator, CFSTR("fm.last.Audioscrobbler"), NULL, &fsref, NULL);
-    if (err == kLSApplicationNotFoundErr) 
+    if (!scrobsub_fsref(&fsref))
         return false;
     
     LSApplicationParameters p = {0};
