@@ -154,12 +154,12 @@ static char* escape(const char* in)
     return strdup(outs);
 }
 
-static void handshake()
+static bool handshake()
 {
     scrobsub_finish_auth();
     
     if (!scrobsub_session_key || !scrobsub_username)
-        return; //TODO auth required
+        return false; //TODO auth required AGAIN
     
     char* username = escape(scrobsub_username);
     time_t time = now();
@@ -185,7 +185,7 @@ static void handshake()
                  username, time, auth, scrobsub_session_key);
     free(username);
 
-    if (n<0) return; //TODO error callback
+    if (n<0) return false; //TODO error callback
 
     char responses[256];
     scrobsub_get(responses, url);
@@ -196,9 +196,12 @@ static void handshake()
         session_id = handshake_response_strdup(&response);
         np_url = handshake_response_strdup(&response);
         submit_url = handshake_response_strdup(&response);
-    }else
+        return true;
+    }else{
         //TODO better
         (scrobsub_callback)(SCROBSUB_ERROR_RESPONSE, response);
+        return false;
+    }
 }
 
 static unsigned int scrobble_time(unsigned int duration)
@@ -271,10 +274,8 @@ void scrobsub_start(const char* _artist, const char* _track, unsigned int _durat
         return;
     }
  
-    if (!scrobsub_session_key)
-        return; //TODO
-    if (!session_id)
-        handshake();
+    if (!session_id && !handshake())
+        return;
     if (state != SCROBSUB_STOPPED)
         submit();
     
