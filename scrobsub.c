@@ -57,7 +57,7 @@ bool scrobsub_retrieve_credentials();
 bool scrobsub_launch_audioscrobbler();
 
 #if SCROBSUB_NO_RELAY
-// compiler will optimise this stuff away now
+// compiler will optimise this stuff away now (in theory)
 #define relay false
 #define scrobsub_relay(x)
 #define scrobsub_relay_start(x, y, z)
@@ -71,6 +71,7 @@ char* scrobsub_session_key = 0;
 char* scrobsub_username = 0;
 
 
+/** worth noting that this is UTC and not local */
 static time_t now()
 {
     time_t t;
@@ -273,7 +274,7 @@ void scrobsub_start(const char* _artist, const char* _track, unsigned int _durat
         state = SCROBSUB_PLAYING;
         return;
     }
- 
+
     if (!session_id && !handshake())
         return;
     if (state != SCROBSUB_STOPPED)
@@ -287,7 +288,8 @@ void scrobsub_start(const char* _artist, const char* _track, unsigned int _durat
     track_number = _track_number;
     rating = ' ';
     scrobsub_change_metadata(_artist, _track, _album);
-    start_time = now();    
+    start_time = now();
+    pause_time = 0;
     
     //TODO, don't emit np if user is skipping fast, then you need a timer
     //    static time_t previous_np = 0;

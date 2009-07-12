@@ -69,3 +69,10 @@ them, you will need to call these functions in a separate thread. Or you can
 rely on the user installing the official Last.fm Audioscrobbler application:
 
 #define SCROBSUB_ALWAYS_RELAY 1
+
+
+Development Notes
+=================
+Efficiency in memory consumption was prioritised because we want to be as 
+little a burden to other software as possible. As a result the code is 
+quite unreadable. Sorry about that.
