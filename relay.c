@@ -56,7 +56,8 @@ bool scrobsub_launch_audioscrobbler()
 #if __APPLE__
 static void script(const char* cmd)
 {
-    char a[] = "osascript -e 'tell application \"Audioscrobbler\" to ";
+    // the $ allows us to escape single quotes inside a single quoted string
+    char a[] = "osascript -e $'tell application \"Audioscrobbler\" to ";
     char b[sizeof(a)+strlen(cmd)+2];
     strcpy(b, a);
     strcat(b, cmd);
@@ -73,11 +74,40 @@ void scrobsub_relay(int state)
     }
 }
 
-void scrobsub_relay_start(const char* artist, const char* title, int duration)
+static inline uint strcat_escape_quotes(char* dst, char* src)
 {
-    #define FORMAT "start \""SCROBSUB_CLIENT_ID"\" with \"%s\" by \"%s\" duration %d"
-    char s[sizeof(FORMAT)+strlen(artist)+strlen(title)];
-    snprintf(s, sizeof(s), FORMAT, title, artist, duration);
+    // get to the end of the dst string first
+    while(*dst)
+        dst++;
+    
+    char* c;
+    while(c = *src++){
+        if(c == '\'' || c == '"')
+            *dst++ = '\\';
+        *dst++ = c;
+    }
+    *dst = '\0';
+}
+
+void scrobsub_relay_start(const char* artist, const char* title, int durationi)
+{    
+    #define START "start \"" SCROBSUB_CLIENT_ID "\" with \""
+    #define BY "\" by \""
+    #define DURATION "\" duration %d   " //strlen("%d")+3 = 5 digits, thus up to 99,999 seconds
+
+    const uint N = sizeof(START BY DURATION) +
+                   strlen(artist)*2 + // double the length of maybe-quoted strings
+                   strlen(title)*2;
+    char s[N];
+    strcpy(s, START);
+    strcat_escape_quotes(s, title);
+    strcat(s, BY);
+    strcat_escape_quotes(s, artist);
+    
+    char durations[] = DURATION;
+    snprintf(durations, sizeof(durations), DURATION, durationi);
+    strcat(s, durations);
+
     script(s);
 }
 #endif //__APPLE__
