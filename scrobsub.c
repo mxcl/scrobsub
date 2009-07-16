@@ -128,7 +128,7 @@ static char* escape(const char* in)
     int const n = strlen(in);
     int const nn = n*3 + 1;
 #if SCROBSUB_NO_C99
-    // we only use alloca on Windows as its use is discouraged on BSD
+    // we only use alloca on Windows as its use is discouraged on BSD    
     char* outs = (char*)alloca(nn);
 #else
     char outs[nn];
@@ -153,6 +153,7 @@ static char* escape(const char* in)
     }
     *out = '\0';
 
+    // we strdup here rather than malloc above to keep memory consumption lower
     return strdup(outs);
 }
 
