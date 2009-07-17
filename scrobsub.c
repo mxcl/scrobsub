@@ -95,7 +95,12 @@ void scrobsub_init(void(*callback)(int, const char*))
     track = (char*)malloc(0);
     album = (char*)malloc(0);
     mbid = (char*)malloc(0);
-}    
+}
+
+bool scrobsub_query_relay()
+{
+    return relay;
+}
 
 static void get_handshake_auth(char out[33], time_t time)
 {
